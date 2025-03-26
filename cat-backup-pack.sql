@@ -1,5 +1,5 @@
 ﻿prompt PL/SQL Developer Export User Objects for user KHATIA@ORCL
-prompt Created by xatia on Saturday, March 22, 2025
+prompt Created by xatia on Thursday, March 27, 2025
 set define off
 spool cat-backup-pack.log
 
@@ -208,7 +208,7 @@ create table KHATIA.REGISTER
   password VARCHAR2(100),
   id       NUMBER generated always as identity,
   role_id  NUMBER,
-  mobile   NUMBER
+  mobile   VARCHAR2(13)
 )
 tablespace USERS
   pctfree 10
@@ -322,6 +322,96 @@ alter table KHATIA.CART
 alter table KHATIA.CART
   add constraint FK_USER_ID foreign key (USER_ID)
   references KHATIA.REGISTER (ID);
+
+prompt
+prompt Creating table CINEMA_PRODUCT
+prompt =============================
+prompt
+create table KHATIA.CINEMA_PRODUCT
+(
+  id           NUMBER generated always as identity,
+  image        VARCHAR2(100),
+  imdb         NUMBER,
+  movie_length VARCHAR2(20),
+  name         VARCHAR2(100),
+  director     VARCHAR2(100),
+  genre        VARCHAR2(1000),
+  stars        VARCHAR2(1000),
+  category_id  NUMBER
+)
+tablespace USERS
+  pctfree 10
+  initrans 1
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  );
+alter table KHATIA.CINEMA_PRODUCT
+  add constraint PK_MOVIE_ID primary key (ID)
+  using index 
+  tablespace USERS
+  pctfree 10
+  initrans 2
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  );
+alter table KHATIA.CINEMA_PRODUCT
+  add constraint FK_CATEGORY_MOV_ID foreign key (CATEGORY_ID)
+  references KHATIA.CATEGORY_1ST_CHILD (ID);
+
+prompt
+prompt Creating table CINEMA_SESSIONS
+prompt ==============================
+prompt
+create table KHATIA.CINEMA_SESSIONS
+(
+  id             NUMBER generated always as identity,
+  cinema         VARCHAR2(100),
+  language       VARCHAR2(100),
+  movie_id       NUMBER,
+  starting_price VARCHAR2(1000),
+  current_price  VARCHAR2(1000),
+  screen         VARCHAR2(1000),
+  time           VARCHAR2(1000),
+  session_date   VARCHAR2(1000)
+)
+tablespace USERS
+  pctfree 10
+  initrans 1
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  );
+alter table KHATIA.CINEMA_SESSIONS
+  add constraint PK_CINEMA_ID primary key (ID)
+  using index 
+  tablespace USERS
+  pctfree 10
+  initrans 2
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  );
+alter table KHATIA.CINEMA_SESSIONS
+  add constraint FK_MOVIE_ID foreign key (MOVIE_ID)
+  references KHATIA.CINEMA_PRODUCT (ID);
 
 prompt
 prompt Creating table CLIENTS
@@ -766,29 +856,83 @@ prompt =====================
 prompt
 create table KHATIA.ORDERS
 (
-  id          NUMBER generated always as identity,
-  cart_id     NUMBER,
-  address     VARCHAR2(100),
-  total_price NUMBER,
-  user_id     NUMBER
+  id             NUMBER generated always as identity,
+  total_price    NUMBER,
+  total_quantity NUMBER,
+  user_id        NUMBER
 )
 tablespace USERS
   pctfree 10
   initrans 1
-  maxtrans 255;
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  );
 alter table KHATIA.ORDERS
   add constraint PK_ORD_ID primary key (ID)
   using index 
   tablespace USERS
   pctfree 10
   initrans 2
-  maxtrans 255;
-alter table KHATIA.ORDERS
-  add constraint FK_CART_ID foreign key (CART_ID)
-  references KHATIA.CART (ID);
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  );
 alter table KHATIA.ORDERS
   add constraint FK_US_ID foreign key (USER_ID)
   references KHATIA.REGISTER (ID);
+
+prompt
+prompt Creating table ORDER_DETAILS
+prompt ============================
+prompt
+create table KHATIA.ORDER_DETAILS
+(
+  id         NUMBER generated always as identity,
+  product_id NUMBER,
+  order_id   NUMBER,
+  quantity   NUMBER,
+  price      NUMBER
+)
+tablespace USERS
+  pctfree 10
+  initrans 1
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  );
+alter table KHATIA.ORDER_DETAILS
+  add constraint PK_CAT_ORDER_ID primary key (ID)
+  using index 
+  tablespace USERS
+  pctfree 10
+  initrans 2
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  );
+alter table KHATIA.ORDER_DETAILS
+  add constraint FK_ORD_ID foreign key (ORDER_ID)
+  references KHATIA.ORDERS (ID);
+alter table KHATIA.ORDER_DETAILS
+  add constraint FK_PRODD_ID foreign key (PRODUCT_ID)
+  references KHATIA.CATEGORIES_PRODUCT (ID);
 
 prompt
 prompt Creating table PRODUCT_DETAILS
@@ -1213,6 +1357,43 @@ alter table KHATIA.USER_ANSWERS
   references KHATIA.ADMIN_QUESTIONS (ID);
 
 prompt
+prompt Creating table VERIFY_CODE
+prompt ==========================
+prompt
+create table KHATIA.VERIFY_CODE
+(
+  id          NUMBER generated always as identity,
+  phonenumber VARCHAR2(13),
+  code        VARCHAR2(6),
+  isverified  NUMBER default 0
+)
+tablespace USERS
+  pctfree 10
+  initrans 1
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  );
+alter table KHATIA.VERIFY_CODE
+  add constraint PK_CODE_ID primary key (ID)
+  using index 
+  tablespace USERS
+  pctfree 10
+  initrans 2
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 1M
+    minextents 1
+    maxextents unlimited
+  );
+
+prompt
 prompt Creating view TASKS_VIEW
 prompt ========================
 prompt
@@ -1295,14 +1476,19 @@ create or replace package khatia.pkg_categories_operations is
                           p_lastname varchar2,
                           p_email    varchar2,
                           p_password varchar2,
-                          p_mobile   number,
+                          p_mobile   varchar2,
                           p_role_id  IN NUMBER);
 
-  procedure proc_add_order(p_json    CLOB,
-                           p_address varchar2,
-                           p_user_id number);
+  procedure proc_add_order(p_json           CLOB,
+                           p_total_price    number,
+                           p_total_quantity number,
+                           p_user_id        number);
+  procedure proc_get_order(p_user_id    number,
+                           p_order_curs OUT SYS_REFCURSOR);
   PROCEDURE proc_login_user(p_email     IN VARCHAR2,
                             p_user_curs OUT SYS_REFCURSOR);
+  procedure proc_get_sum_orders(p_user_id    number,
+                                p_order_curs OUT SYS_REFCURSOR);
   PROCEDURE proc_get_user_info(p_email     IN VARCHAR2,
                                p_user_curs OUT SYS_REFCURSOR);
   PROCEDURE proc_get_locations(p_maincat_id  number,
@@ -1334,6 +1520,26 @@ create or replace package khatia.pkg_categories_operations is
                              p_lastname varchar2,
                              p_email    varchar2,
                              p_mobile   varchar2);
+  procedure proc_save_code(p_code varchar2, p_phonenumber varchar2);
+  procedure proc_get_code(p_phonenumber varchar2,
+                          p_verify_curs OUT SYS_REFCURSOR);
+  procedure proc_get_users(p_users_curs OUT SYS_REFCURSOR);
+  procedure proc_create_movie(p_image        varchar2,
+                              p_imdb         number,
+                              p_movie_length varchar2,
+                              p_name         varchar2,
+                              p_director     varchar2,
+                              p_stars        clob,
+                              p_genre        clob,
+                              p_category_id  number);
+  procedure proc_add_session_movie(p_cinema   varchar2,
+                                   p_language varchar2,
+                                   p_movie_id number,
+                                   p_session  clob);
+  procedure proc_get_movie(p_id number, p_movie_curs OUT SYS_REFCURSOR);
+  procedure proc_get_movies(p_category_id   number,
+                            p_category_name varchar2,
+                            p_movie_curs    OUT SYS_REFCURSOR);
 end pkg_categories_operations;
 /
 
@@ -1779,6 +1985,7 @@ create or replace package body khatia.pkg_categories_operations is
       SELECT c.product_name,
              c.id,
              c.category_id,
+             t.category_id as main_id,
              c.title,
              c.price,
              LISTAGG(c.image_path, ',') WITHIN GROUP(ORDER BY c.id) AS image_path,
@@ -1804,6 +2011,7 @@ create or replace package body khatia.pkg_categories_operations is
        GROUP BY c.product_name,
                 c.id,
                 c.category_id,
+                t.category_id,
                 c.title,
                 c.price,
                 c.contact,
@@ -1873,7 +2081,7 @@ create or replace package body khatia.pkg_categories_operations is
                           p_lastname varchar2,
                           p_email    varchar2,
                           p_password varchar2,
-                          p_mobile   number,
+                          p_mobile   varchar2,
                           p_role_id  IN NUMBER) as
     v_count NUMBER;
   begin
@@ -1890,27 +2098,71 @@ create or replace package body khatia.pkg_categories_operations is
     end if;
   end proc_add_user;
 
-  procedure proc_add_order(p_json    CLOB,
-                           p_address varchar2,
-                           p_user_id number) as
-    v_product_price NUMBER;
+  procedure proc_add_order(p_json           CLOB,
+                           p_total_price    number,
+                           p_total_quantity number,
+                           p_user_id        number) as
+    v_order_id NUMBER;
+  
     CURSOR v_add_orders_curs IS
-      SELECT *
-        FROM JSON_TABLE(p_json, '$[*]' COLUMNS(cart_id NUMBER PATH '$'));
+      SELECT product_id, quantity, price
+        FROM JSON_TABLE(p_json,
+                        '$.product_ids[*]'
+                        COLUMNS(product_id NUMBER PATH '$.product_id',
+                                quantity NUMBER PATH '$.quantity',
+                                price NUMBER PATH '$.price'));
   begin
+    INSERT INTO orders
+      (total_price, total_quantity, user_id)
+    VALUES
+      (p_total_price, p_total_quantity, p_user_id)
+    RETURNING id INTO v_order_id;
     FOR order_item IN v_add_orders_curs LOOP
-      SELECT sum_price
-        INTO v_product_price
-        FROM cart
-       WHERE id = order_item.cart_id
-         and user_id = p_user_id;
-      INSERT INTO orders
-        (cart_id, address, total_price, user_id)
+      INSERT INTO order_details
+        (product_id, order_id, quantity, price)
       VALUES
-        (order_item.cart_id, p_address, v_product_price, p_user_id);
+        (order_item.product_id,
+         v_order_id,
+         order_item.quantity,
+         order_item.price);
     END LOOP;
   end proc_add_order;
 
+  procedure proc_get_order(p_user_id    number,
+                           p_order_curs OUT SYS_REFCURSOR) as
+  begin
+    open p_order_curs for
+      SELECT o.id,
+             o.total_quantity,
+             o.total_price,
+             o.user_id,
+             JSON_ARRAYAGG(JSON_OBJECT('title' VALUE p.title,
+                                       'product_name' VALUE p.product_name,
+                                       'image_path' VALUE
+                                       JSON_VALUE(p.image_path, '$[0]'),
+                                       'quantity' VALUE od.quantity,
+                                       'price' VALUE od.price,
+                                       'product_id' VALUE od.product_id)) AS products
+        FROM orders o
+      
+       inner join order_details od
+          on o.id = od.order_id
+       inner join categories_product p
+          on p.id = od.product_id
+       where p_user_id = o.user_id
+       GROUP BY o.id, o.total_quantity, o.total_price, o.user_id;
+  end proc_get_order;
+
+  procedure proc_get_sum_orders(p_user_id    number,
+                                p_order_curs OUT SYS_REFCURSOR) as
+  begin
+    open p_order_curs for
+      select sum(o.total_price) as total_price,
+             sum(o.total_quantity) as total_quantity
+        from orders o
+       where p_user_id = o.user_id
+       group by o.user_id;
+  end proc_get_sum_orders;
   PROCEDURE proc_login_user(p_email     IN VARCHAR2,
                             p_user_curs OUT SYS_REFCURSOR) IS
   BEGIN
@@ -1990,9 +2242,7 @@ create or replace package body khatia.pkg_categories_operations is
              sum(b.quantity) over() as total_quantity,
              b.quantity as vaucher_quantity,
              sum(b.quantity * p.vaucher) over() as total_price,
-             (p.price -
-             ((p.price / 100) * p.sale) +
-             p.vaucher) as current_price,
+             (p.price - ((p.price / 100) * p.sale) + p.vaucher) as current_price,
              (p.price) as starting_price
         from categories_product p
        inner join basket b
@@ -2037,6 +2287,7 @@ create or replace package body khatia.pkg_categories_operations is
              t.guests,
              t.id,
              t.sale,
+             f.category_id,
              (t.price - (t.price / 100) * t.sale + t.vaucher) as current_price
         from categories c
        inner join category_1st_child f
@@ -2094,6 +2345,151 @@ create or replace package body khatia.pkg_categories_operations is
            mobile   = p_mobile
      where id = p_user_id;
   end proc_update_user;
+  procedure proc_save_code(p_code varchar2, p_phonenumber varchar2) as
+  begin
+    insert into Verify_Code
+      (phonenumber, code)
+    values
+      (p_phonenumber, p_code);
+  end proc_save_code;
+  procedure proc_get_code(p_phonenumber varchar2,
+                          p_verify_curs OUT SYS_REFCURSOR) as
+  begin
+    open p_verify_curs for
+      select c.code from Verify_Code c where p_phonenumber = c.phonenumber;
+  end proc_get_code;
+  procedure proc_get_users(p_users_curs OUT SYS_REFCURSOR) as
+  begin
+    open p_users_curs for
+      select u.name, u.lastname, u.id from Register u where u.role_id = 2;
+  end proc_get_users;
+
+  procedure proc_create_movie(p_image        varchar2,
+                              p_imdb         number,
+                              p_movie_length varchar2,
+                              p_name         varchar2,
+                              p_director     varchar2,
+                              p_stars        clob,
+                              p_genre        clob,
+                              p_category_id  number) as
+    l_stars clob;
+    l_genre clob;
+  begin
+    SELECT JSON_ARRAYAGG(value)
+      INTO l_stars
+      FROM JSON_TABLE(p_stars, '$[*]' COLUMNS(value VARCHAR2(100) PATH '$'));
+  
+    SELECT JSON_ARRAYAGG(value)
+      INTO l_genre
+      FROM JSON_TABLE(p_genre, '$[*]' COLUMNS(value varchar2 PATH '$'));
+  
+    insert into cinema_product
+      (image,
+       imdb,
+       movie_length,
+       name,
+       director,
+       stars,
+       genre,
+       category_id)
+    values
+      (p_image,
+       p_imdb,
+       p_movie_length,
+       p_name,
+       p_director,
+       l_stars,
+       l_genre,
+       p_category_id);
+  end proc_create_movie;
+
+  procedure proc_add_session_movie(p_cinema   varchar2,
+                                   p_language varchar2,
+                                   p_movie_id number,
+                                   p_session  clob) as
+  
+    CURSOR v_add_session_curs IS
+      SELECT starting_price, current_price, screen, time, session_date
+        FROM JSON_TABLE(p_session,
+                        '$.sessions[*]'
+                        COLUMNS(starting_price varchar2 PATH
+                                '$.starting_price',
+                                current_price varchar2 PATH '$.current_price',
+                                screen varchar2 PATH '$.screen',
+                                time varchar2 PATH '$.time',
+                                session_date varchar2 PATH '$.session_date'));
+  begin
+    FOR session IN v_add_session_curs LOOP
+      INSERT INTO cinema_sessions
+        (cinema,
+         language,
+         movie_id,
+         starting_price,
+         current_price,
+         screen,
+         time,
+         session_date)
+      VALUES
+        (p_cinema,
+         p_language,
+         p_movie_id,
+         session.starting_price,
+         session.current_price,
+         session.screen,
+         session.time,
+         session.session_date);
+    END LOOP;
+  end proc_add_session_movie;
+
+  procedure proc_get_movie(p_id number, p_movie_curs OUT SYS_REFCURSOR) as
+  begin
+    open p_movie_curs for
+      select m.id,
+             m.imdb,
+             m.image,
+             m.movie_length,
+             m.name,
+             m.director,
+             LISTAGG(m.stars, ',') WITHIN GROUP(ORDER BY m.id) AS stars,
+             LISTAGG(m.genre, ',') WITHIN GROUP(ORDER BY m.id) AS genre,
+             s.id as sessionid,
+             s.language,
+             s.movie_id,
+             s.cinema,
+             JSON_ARRAYAGG(JSON_OBJECT('starting_price' VALUE
+                                       s.starting_price,
+                                       'current_price' VALUE s.current_price,
+                                       'screen' VALUE s.screen,
+                                       'time' VALUE s.time,
+                                       'session_date' VALUE s.session_date)) AS session
+      
+        from cinema_product m
+       inner join cinema_sessions s
+          on m.id = s.movie_id
+       where p_id = m.id
+       group by m.id, m.imdb, m.image, m.movie_length, m.name, m.director;
+  end proc_get_movie;
+
+  procedure proc_get_movies(p_category_id   number,
+                            p_category_name varchar2,
+                            p_movie_curs    OUT SYS_REFCURSOR) as
+  begin
+    open p_movie_curs for
+      select m.id,
+             m.imdb,
+             m.image,
+             m.movie_length,
+             m.name,
+             LISTAGG(m.genre, ',') WITHIN GROUP(ORDER BY m.id) AS genre,
+             c.id as category_id,
+             c.category_name
+        from cinema_product m
+       inner join categories c
+          on c.id = m.category_id
+       where p_category_id = c.id
+         and p_category_name = c.category_name
+       group by m.id, m.imdb, m.image, m.movie_length, m.name, genre, c.id,c.category_name;
+  end proc_get_movies;
 end pkg_categories_operations;
 /
 
